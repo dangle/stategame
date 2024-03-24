@@ -18,7 +18,8 @@ class StateMachine:
             if self._state.is_terminal:
                 return
 
-            print(f'{self._state.prompt} ({" / ".join(self._state.options.keys())})')
+            options_list: str = " / ".join(self._state.options.keys())
+            print(f"{self._state.prompt} ({options_list})")
             print("> ", end="")
             input_ = input()
             self._state = self._state.transition(input_)
