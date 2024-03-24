@@ -30,7 +30,7 @@ class _StateMetaclass(type):
 
         return new_cls
 
-    def __call__(cls: _StateMetaclass, *_, **__) -> _StateMetaclass:
+    def __call__(cls: _StateMetaclass) -> _StateMetaclass:
         return cls._instance
 
 
