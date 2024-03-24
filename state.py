@@ -4,7 +4,6 @@ import functools
 import typing
 
 import openai
-import PIL as pillow
 import PIL.Image
 import requests
 
@@ -67,7 +66,7 @@ class State(metaclass=_StateMetaclass):
         return getattr(self.__class__, "PROMPT", None)
 
     @functools.cached_property
-    def image(self) -> pillow.Image | None:
+    def image(self) -> PIL.Image.Image | None:
         if self.image_description is None:
             return None
 
@@ -80,7 +79,7 @@ class State(metaclass=_StateMetaclass):
         )
         url: str = response.data[0].url
         raw_image: typing.Any = requests.get(url, stream=True).raw
-        return pillow.Image.open(raw_image)
+        return PIL.Image.open(raw_image)
 
     @functools.cache
     def __str__(self) -> str:
