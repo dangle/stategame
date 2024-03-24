@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import states as _
 from state import State
 
 
