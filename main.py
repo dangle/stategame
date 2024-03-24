@@ -19,7 +19,7 @@ class Apartment(State):
     There is no one else in the apartment
     """
     PROMPT: str = "Would you like to go outside or take a nap?"
-    OPTIONS: dict[str, State] = {
+    OPTIONS: dict[str, str] = {
         "outside": "OutsideApartment",
         "nap": "Nap",
     }
@@ -40,7 +40,7 @@ class OutsideApartment(State):
     There is about two inches of snow on the ground.
     """
     PROMPT: str = "Would you like to go back inside?"
-    OPTIONS: dict[str, State] = {
+    OPTIONS: dict[str, str] = {
         "yes": "Apartment",
     }
 

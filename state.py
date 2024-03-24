@@ -10,12 +10,9 @@ import requests
 _CLIENT = openai.OpenAI()
 
 
-T = typing.TypeVar("T", bound="_StateMetaclass")
-
-
 class _StateMetaclass(type):
 
-    _instance: T
+    _instance: _StateMetaclass
 
     def __new__(
         cls: type[_StateMetaclass],
@@ -25,7 +22,7 @@ class _StateMetaclass(type):
     ) -> _StateMetaclass:
         new_cls = super().__new__(cls, name, bases, classdict)
         new_cls._instance = super(cls, new_cls).__call__()
-        new_cls._instance.image
+        getattr(new_cls._instance, "image", None)
 
         for base in bases:
             if isinstance(base, cls):
@@ -33,7 +30,7 @@ class _StateMetaclass(type):
 
         return new_cls
 
-    def __call__(cls: type[T], *_, **__) -> T:
+    def __call__(cls: _StateMetaclass, *_, **__) -> _StateMetaclass:
         return cls._instance
 
 
@@ -47,7 +44,7 @@ class State(metaclass=_StateMetaclass):
 
     @functools.cached_property
     def is_terminal(self) -> bool:
-        return getattr(self.__class__, "TERMINAL", None)
+        return getattr(self.__class__, "TERMINAL", False)
 
     @functools.cached_property
     def description(self) -> str | None:
@@ -70,15 +67,16 @@ class State(metaclass=_StateMetaclass):
         if self.image_description is None:
             return None
 
-        response: openai.ImagesResponse = _CLIENT.images.generate(
+        response: openai.types.ImagesResponse = _CLIENT.images.generate(
             model="dall-e-3",
             prompt=self.image_description,
             size="1024x1024",
             quality="standard",
             n=1,
         )
-        url: str = response.data[0].url
+        url: str = typing.cast(str, response.data[0].url)
         raw_image: typing.Any = requests.get(url, stream=True).raw
+
         return PIL.Image.open(raw_image)
 
     @functools.cache
