@@ -10,16 +10,16 @@ class StateMachine:
 
     def run(self):
         while 1:
-            print(self._state.description)
-
-            if self._state.image:
-                self._state.image.show()
+            self.display_state()
 
             if self._state.is_terminal:
                 return
 
-            options_list: str = " / ".join(self._state.options.keys())
-            print(f"{self._state.prompt} ({options_list})")
-            print("> ", end="")
-            input_ = input()
+            input_: str = self.get_transition()
             self._state = self._state.transition(input_)
+
+    def display_state(self):
+        pass
+
+    def get_transition(self) -> str:
+        pass

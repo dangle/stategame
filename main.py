@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import time
+
+from cli_state_machine import CliStateMachine
 from state import State
-from state_machine import StateMachine
+from tk_state_machine import TkStateMachine
 
 
 class Apartment(State):
     DESCRIPTION: str = """
-    You are inside of a small apartment downtown. There is a couch, a TV, and
-    a messy bed. You can see a window with a view overlooking a snowy park.
+    You are inside of a small apartment downtown.
+    There is a couch, a TV, and a messy bed.
+    You can see a window with a view overlooking a snowy park.
     """
     IMAGE_DESCRIPTION: str = """
     A first-person view of a small apartment on the sixth floor of a building
@@ -27,8 +31,10 @@ class Apartment(State):
 
 class OutsideApartment(State):
     DESCRIPTION: str = """
-    You are standing outside of an apartment building downtown. All around are
-    tall buildings. People are walking by. You can see a park in the distance.
+    You are standing outside of an apartment building downtown.
+    All around are tall buildings.
+    People are walking by.
+    You can see a park in the distance.
     It is very cold.
     """
     IMAGE_DESCRIPTION: str = """
@@ -49,9 +55,23 @@ class Nap(State):
     DESCRIPTION: str = """
     You have decided to take a nap. Good night!
     """
+    IMAGE_DESCRIPTION: str = """
+    A person in a small apartment sleeping in a bed with a blanket over them.
+    The moon is visible through the window.
+    """
+
+    def transition(self, _: str | None = None) -> State:
+        time.sleep(5)
+        return State.ExitGame
+
+
+class ExitGame(State):
     TERMINAL: bool = True
 
 
 if __name__ == "__main__":
-    game = StateMachine(State.Apartment)
-    game.run()
+    try:
+        game = TkStateMachine(State.Apartment)
+        game.run()
+    except KeyboardInterrupt:
+        pass

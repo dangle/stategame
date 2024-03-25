@@ -7,8 +7,6 @@ import openai
 import PIL.Image
 import requests
 
-_CLIENT = openai.OpenAI()
-
 
 class _StateMetaclass(type):
 
@@ -22,7 +20,6 @@ class _StateMetaclass(type):
     ) -> _StateMetaclass:
         new_cls = super().__new__(cls, name, bases, classdict)
         new_cls._instance = super(cls, new_cls).__call__()
-        getattr(new_cls._instance, "image", None)
 
         for base in bases:
             if isinstance(base, cls):
@@ -36,10 +33,13 @@ class _StateMetaclass(type):
 
 class State(metaclass=_StateMetaclass):
 
-    @functools.cache
-    def transition(self, input: str) -> State:
-        if self.options.get(input):
-            return getattr(State, self.options[input], self)
+    def transition(self, input_: str | None = None) -> State:
+        if input_ is None:
+            return self
+
+        if self.options.get(input_):
+            return getattr(State, self.options[input_], self)
+
         return self
 
     @functools.cached_property
@@ -48,7 +48,11 @@ class State(metaclass=_StateMetaclass):
 
     @functools.cached_property
     def description(self) -> str | None:
-        return getattr(self.__class__, "DESCRIPTION", None)
+        desc: str = getattr(self.__class__, "DESCRIPTION", None)
+
+        if desc:
+            lines: list[str] = desc.strip().split("\n")
+            return "\n".join(line.strip() for line in lines)
 
     @functools.cached_property
     def image_description(self) -> str | None:
@@ -63,11 +67,15 @@ class State(metaclass=_StateMetaclass):
         return getattr(self.__class__, "PROMPT", None)
 
     @functools.cached_property
+    def _client(self) -> openai.OpenAI:
+        return openai.OpenAI()
+
+    @functools.cached_property
     def image(self) -> PIL.Image.Image | None:
         if self.image_description is None:
             return None
 
-        response: openai.types.ImagesResponse = _CLIENT.images.generate(
+        response: openai.types.ImagesResponse = self._client.images.generate(
             model="dall-e-3",
             prompt=self.image_description,
             size="1024x1024",
