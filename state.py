@@ -33,6 +33,8 @@ class _StateMetaclass(type):
 
 class State(metaclass=_StateMetaclass):
 
+    _oaiclient: openai.OpenAI | None = None
+
     def transition(self, input_: str | None = None) -> State:
         if input_ is None:
             return self
@@ -68,7 +70,9 @@ class State(metaclass=_StateMetaclass):
 
     @functools.cached_property
     def _client(self) -> openai.OpenAI:
-        return openai.OpenAI()
+        if not State._oaiclient:
+            State._oaiclient = openai.OpenAI()
+        return State._oaiclient
 
     @functools.cached_property
     def image(self) -> PIL.Image.Image | None:
